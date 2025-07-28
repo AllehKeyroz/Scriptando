@@ -2,7 +2,8 @@
 
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
 
-const SCRIPT_CONTENT = (appBaseUrl) => `
+const SCRIPT_CONTENT = (appBaseUrl) => {
+  return `
 (function() {
     'use strict';
 
@@ -20,12 +21,14 @@ const SCRIPT_CONTENT = (appBaseUrl) => `
     function getSubaccountId() {
         try {
             if (window.locationId) {
+                console.log('GHL Script Manager: Encontrado locationId em window.locationId');
                 return window.locationId;
             }
             
             const bodyClass = document.body.className;
             const match = bodyClass.match(/location-([a-zA-Z0-9]+)/);
             if (match && match[1]) {
+                 console.log('GHL Script Manager: Encontrado locationId na classe do body.');
                 return match[1];
             }
             
@@ -34,11 +37,13 @@ const SCRIPT_CONTENT = (appBaseUrl) => `
                 if (script.textContent) {
                     const scriptMatch = script.textContent.match(/"locationId":\\s*"([a-zA-Z0-9]+)"/);
                     if (scriptMatch && scriptMatch[1]) {
+                        console.log('GHL Script Manager: Encontrado locationId em um script inline.');
                         return scriptMatch[1];
                     }
                 }
             }
-
+            
+            console.log('GHL Script Manager: Não foi possível encontrar o locationId.');
             return null;
         } catch (e) {
             console.error('GHL Script Manager: Erro ao obter ID da subconta.', e);
@@ -185,6 +190,7 @@ const SCRIPT_CONTENT = (appBaseUrl) => `
 
 })();
 `;
+}
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
