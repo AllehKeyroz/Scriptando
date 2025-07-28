@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Bot, Code, Home, Settings, Users } from 'lucide-react';
+import { Bot, Code, Home, Settings, Users, Syringe } from 'lucide-react';
 
 export default function DashboardLayout({
   children,
@@ -32,6 +32,8 @@ export default function DashboardLayout({
         return 'Subcontas';
       case '/dashboard/gerador-ia':
         return 'Gerador IA';
+      case '/dashboard/injetor':
+        return 'Script de Injeção';
       case '/dashboard/configuracoes':
         return 'Configurações';
       default:
@@ -79,9 +81,17 @@ export default function DashboardLayout({
             </SidebarMenuItem>
             <SidebarMenuItem>
                <Link href="/dashboard/gerador-ia">
-                <SidebarMenuButton tooltip="Gerador IA" isActive={pathname === '/dashboard/gerador-ia'}>
+                <SidebarMenuButton tooltip="Gerador IA" isActive={pathname.startsWith('/dashboard/gerador-ia')}>
                   <Bot />
                   Gerador IA
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+               <Link href="/dashboard/injetor">
+                <SidebarMenuButton tooltip="Injetor" isActive={pathname === '/dashboard/injetor'}>
+                  <Syringe />
+                  Injetor
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
