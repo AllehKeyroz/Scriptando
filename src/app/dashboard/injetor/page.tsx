@@ -3,9 +3,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Clipboard, Bot, Syringe } from 'lucide-react';
+import { Check, Clipboard, Bot, Syringe, AlertTriangle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002'; // Use uma variável de ambiente ou um valor padrão
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
 
 const SCRIPT_LOADER = `<script src="${APP_URL}/api/injector" async defer></script>`;
 
@@ -25,6 +26,13 @@ export default function InjetorPage() {
 
     return (
         <div className="flex flex-col gap-6">
+             <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Configuração Essencial</AlertTitle>
+                <AlertDescription>
+                    Para que o script funcione em produção, você **DEVE** configurar a variável de ambiente <code className="font-semibold bg-muted/50 px-1 py-0.5 rounded-sm">NEXT_PUBLIC_APP_URL</code> no seu painel de hospedagem (Easy Panel) com a URL final da sua aplicação. Caso contrário, ele tentará se comunicar com <code className="font-semibold bg-muted/50 px-1 py-0.5 rounded-sm">localhost</code> e não funcionará.
+                </AlertDescription>
+            </Alert>
             <Card>
                 <CardHeader>
                     <div className="flex items-center gap-4">
@@ -67,9 +75,9 @@ export default function InjetorPage() {
                 <CardHeader className="flex flex-row items-center gap-4">
                     <Bot className="h-6 w-6 text-amber-600 dark:text-amber-400"/>
                     <div >
-                        <CardTitle className="text-amber-900 dark:text-amber-200">Próximos Passos</CardTitle>
+                        <CardTitle className="text-amber-900 dark:text-amber-200">Como Depurar (Debug)</CardTitle>
                         <CardDescription className="text-amber-800 dark:text-amber-300">
-                           Após instalar o script, navegue até a subconta de admin para testar o Gerador de IA.
+                           Após instalar o script, abra o console do desenvolvedor do navegador (F12) na página do GHL. Você verá mensagens do "GHL Script Manager" indicando o que ele está fazendo.
                         </CardDescription>
                     </div>
                 </CardHeader>

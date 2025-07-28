@@ -13,7 +13,7 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from '@/components/ui/sidebar';
-import { Bot, Code, Home, Settings, Users, Syringe } from 'lucide-react';
+import { Bot, Code, Home, Settings, Users, Syringe, AlertTriangle } from 'lucide-react';
 
 export default function DashboardLayout({
   children,

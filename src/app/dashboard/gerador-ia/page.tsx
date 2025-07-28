@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { generateScript, GenerateScriptInput, GenerateScriptOutput } from '@/ai/flows/generate-script-flow';
@@ -43,7 +44,9 @@ export default function GeradorIAPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
-      if (event.source !== window.parent) return;
+      // Basic security: check the origin if in production
+      // For development, you might need to relax this check
+      // if (process.env.NODE_ENV === 'production' && event.origin !== window.location.origin) return;
 
       if (event.data.type === 'GHL_DOM_CONTENT') {
         setDomContent(event.data.dom);
@@ -58,7 +61,7 @@ export default function GeradorIAPage() {
 
     window.addEventListener('message', handleMessage);
 
-    // Request DOM from parent on load
+    // Request DOM from parent on load, only if inside an iframe
     if (window.parent && window.parent !== window) {
         window.parent.postMessage({ type: 'REQUEST_GHL_DOM' }, '*');
     }
@@ -70,7 +73,7 @@ export default function GeradorIAPage() {
   
   useEffect(() => {
     if (scrollAreaRef.current) {
-        const viewport = scrollAreaRef.current.querySelector('div');
+        const viewport = scrollAreaRef.current.querySelector('div[data-radix-scroll-area-viewport]');
         if(viewport) {
             viewport.scrollTop = viewport.scrollHeight;
         }
@@ -93,6 +96,10 @@ export default function GeradorIAPage() {
       
       const aiInput: GenerateScriptInput = { dom: domContent, command: input };
       const result = await generateScript(aiInput);
+
+      if(!result.script) {
+        throw new Error("A IA não retornou um script válido.");
+      }
 
       const botMessage: Message = { id: `bot-${Date.now()}`, sender: 'bot', script: result.script };
       setMessages((prev) => [...prev, botMessage]);
@@ -153,9 +160,9 @@ export default function GeradorIAPage() {
      }
   };
 
-  if (!isReady && typeof window !== 'undefined' && window.parent === window) {
+  if (typeof window !== 'undefined' && window.parent === window) {
     return (
-        <div className="flex flex-col items-center justify-center h-screen bg-muted/40 text-center">
+        <div className="flex flex-col items-center justify-center h-screen bg-muted/40 text-center p-4">
             <Bot className="h-12 w-12 mb-4 text-muted-foreground" />
             <h2 className="text-2xl font-semibold mb-2">Gerador de IA</h2>
             <p className="text-muted-foreground max-w-md">
@@ -171,7 +178,7 @@ export default function GeradorIAPage() {
 
   if (!isReady) {
     return (
-       <div className="flex items-center justify-center h-screen">
+       <div className="flex items-center justify-center h-screen bg-transparent text-primary-foreground">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="ml-4 text-muted-foreground">Aguardando contexto da página GHL...</p>
        </div>
@@ -182,19 +189,19 @@ export default function GeradorIAPage() {
   return (
     <>
       <div className="flex flex-col h-screen bg-transparent">
-          <Card className="flex-grow flex flex-col h-full rounded-none border-0">
+          <Card className="flex-grow flex flex-col h-full rounded-none border-0 bg-transparent">
             <CardContent className="flex-grow p-4 h-0">
                <ScrollArea className="h-full" ref={scrollAreaRef}>
                  <div className="space-y-4 pr-4">
                     {messages.map((message) => (
                       <div key={message.id} className={`flex items-start gap-3 ${message.sender === 'user' ? 'justify-end' : ''}`}>
                         {message.sender === 'bot' && <AvatarIcon className="bg-primary text-primary-foreground"><Bot className="h-5 w-5"/></AvatarIcon>}
-                        <div className={`rounded-lg px-4 py-2 max-w-[85%] ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-background border'}`}>
+                        <div className={`rounded-lg px-4 py-2 max-w-[85%] ${message.sender === 'user' ? 'bg-primary text-primary-foreground' : 'bg-card border'}`}>
                           {message.text && <p className="text-sm">{message.text}</p>}
                           {message.script && (
                              <div className="space-y-2">
                                 <p className="text-sm">Aqui está o script que eu gerei. Você pode executá-lo para testar em tempo real ou salvá-lo.</p>
-                                <pre className="bg-muted/50 p-2 rounded-md text-xs overflow-x-auto mt-2">
+                                <pre className="bg-muted p-2 rounded-md text-xs overflow-x-auto mt-2">
                                     <code>{message.script}</code>
                                 </pre>
                                 <div className="flex gap-2 pt-2">
@@ -210,7 +217,7 @@ export default function GeradorIAPage() {
                     {isLoading && (
                        <div className="flex items-start gap-3">
                             <AvatarIcon className="bg-primary text-primary-foreground"><Bot className="h-5 w-5"/></AvatarIcon>
-                            <div className="rounded-lg px-4 py-3 bg-background border">
+                            <div className="rounded-lg px-4 py-3 bg-card border">
                                 <Loader2 className="h-5 w-5 animate-spin" />
                             </div>
                        </div>
@@ -218,7 +225,7 @@ export default function GeradorIAPage() {
                  </div>
                </ScrollArea>
             </CardContent>
-            <div className="p-4 border-t bg-background/95">
+            <div className="p-4 border-t border-border bg-card/95">
               <div className="relative">
                   <Textarea
                     placeholder="Digite seu comando... Ex: Crie um botão ao lado do nome do contato..."

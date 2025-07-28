@@ -30,7 +30,7 @@ const SCRIPT_CONTENT = `
             const scripts = Array.from(document.scripts);
             for (const script of scripts) {
                 if (script.textContent) {
-                    const scriptMatch = script.textContent.match(/"locationId":\s*"([a-zA-Z0-9]+)"/);
+                    const scriptMatch = script.textContent.match(/"locationId":\\s*"([a-zA-Z0-9]+)"/);
                     if (scriptMatch && scriptMatch[1]) {
                         return scriptMatch[1];
                     }
@@ -61,13 +61,15 @@ const SCRIPT_CONTENT = `
             console.log('GHL Script Manager: Modo Administrador ATIVADO.');
             injectAdminWidget();
         } else {
-            console.log('GHL Script Manager: Modo Padrão.');
+            console.log('GHL Script Manager: Modo Padrão. Carregando scripts para subcontas autorizadas...');
             // Futuramente, aqui será carregado o script para subcontas normais
         }
     }
 
     function injectAdminWidget() {
         if (document.getElementById('ghl-ai-widget-container')) return;
+        
+        console.log('GHL Script Manager: Injetando Widget de IA do Administrador...');
 
         // Estilos
         const styles = document.createElement('style');
@@ -138,6 +140,8 @@ const SCRIPT_CONTENT = `
         // Eventos
         widgetButton.addEventListener('click', toggleWidget);
         window.addEventListener('message', handleMessagesFromApp);
+        
+        console.log('GHL Script Manager: Widget de IA injetado com sucesso.');
     }
     
     function toggleWidget() {
@@ -149,10 +153,13 @@ const SCRIPT_CONTENT = `
         if (event.origin !== APP_BASE_URL) return;
 
         const { type, script } = event.data;
+        
+        console.log('GHL Script Manager: Mensagem recebida do Widget', event.data);
 
         if (type === 'REQUEST_GHL_DOM') {
             const domContent = document.documentElement.outerHTML;
             if (aiWidgetIframe.contentWindow) {
+                 console.log('GHL Script Manager: Enviando DOM para o Widget.');
                 aiWidgetIframe.contentWindow.postMessage({ type: 'GHL_DOM_CONTENT', dom: domContent }, APP_BASE_URL);
             }
         } else if (type === 'EXECUTE_SCRIPT') {
@@ -186,6 +193,9 @@ export async function GET() {
   return new Response(SCRIPT_CONTENT, {
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0',
     },
   });
 }
