@@ -204,13 +204,15 @@ export default function InjetorPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <p className="mb-4 text-sm text-muted-foreground">
-                        Este script é responsável por duas coisas:
-                        <ul className="list-disc pl-5 mt-2 space-y-1">
+                    <div className="mb-4 text-sm text-muted-foreground space-y-2">
+                        <p>
+                            Este script é responsável por duas coisas:
+                        </p>
+                        <ul className="list-disc pl-5 space-y-1">
                             <li><span className="font-semibold">Modo Administrador:</span> Na subconta com ID <code className="bg-muted px-1 py-0.5 rounded">{ADMIN_SUBACCOUNT_ID}</code>, ele ativará um widget de IA para criar e testar scripts em tempo real.</li>
                             <li><span className="font-semibold">Execução Padrão:</span> Em todas as outras subcontas autorizadas, ele carregará e executará os scripts que você salvou no painel (funcionalidade a ser implementada).</li>
                         </ul>
-                    </p>
+                    </div>
                     <Textarea
                         readOnly
                         value={SCRIPT_TEMPLATE.trim()}
