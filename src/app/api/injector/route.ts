@@ -1,7 +1,8 @@
+import { type NextRequest } from 'next/server';
 
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
 
-const SCRIPT_CONTENT = (appBaseUrl) => {
+const SCRIPT_CONTENT = (appBaseUrl: string) => {
   return `
 (function() {
     'use strict';
@@ -29,7 +30,7 @@ const SCRIPT_CONTENT = (appBaseUrl) => {
             }
             console.log('GHL Script Manager: Não foi possível encontrar o ID na URL. Tentando métodos de fallback...');
 
-            // 2. Tenta a variável global `window.locationId`
+            // 2. Tenta a variável global \`window.locationId\`
             if (window.locationId) {
                 console.log('GHL Script Manager: Encontrado locationId em window.locationId:', window.locationId);
                 return window.locationId;
@@ -201,10 +202,8 @@ const SCRIPT_CONTENT = (appBaseUrl) => {
 `;
 }
 
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  // Determina a base da URL dinamicamente a partir do cabeçalho da requisição ou da URL da própria requisição.
-  // Isso garante que funcione tanto em desenvolvimento (localhost) quanto em produção.
+export async function GET(request: NextRequest) {
+  const url = request.nextUrl;
   const host = request.headers.get('host') || url.host;
   const protocol = host.startsWith('localhost') ? 'http:' : 'https:';
   const appBaseUrl = `${protocol}//${host}`;
