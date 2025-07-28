@@ -78,8 +78,8 @@ export default function DashboardLayout({
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-               <Link href="#">
-                <SidebarMenuButton tooltip="Gerador IA">
+               <Link href="/dashboard/gerador-ia">
+                <SidebarMenuButton tooltip="Gerador IA" isActive={pathname === '/dashboard/gerador-ia'}>
                   <Bot />
                   Gerador IA
                 </SidebarMenuButton>
