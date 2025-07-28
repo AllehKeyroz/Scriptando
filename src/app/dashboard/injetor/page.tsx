@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Check, Clipboard, Bot } from 'lucide-react';
+import { Check, Clipboard, Bot, Syringe } from 'lucide-react';
 import Link from 'next/link';
 
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
@@ -238,4 +238,3 @@ export default function InjetorPage() {
         </div>
     );
 }
-
