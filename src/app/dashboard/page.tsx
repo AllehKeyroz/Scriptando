@@ -1,6 +1,53 @@
+'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { app } from '@/lib/firebase';
+import { getFirestore, collection, getDocs } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState({
+    scriptsAtivos: 0,
+    subcontasAutorizadas: 0,
+    receita: 0,
+    execucoesDia: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const db = getFirestore(app);
+        
+        // Buscar total de scripts
+        const scriptsSnapshot = await getDocs(collection(db, 'scripts'));
+        const scriptsAtivos = scriptsSnapshot.size;
+
+        // Buscar total de subcontas autorizadas
+        const subcontasSnapshot = await getDocs(collection(db, 'subcontas'));
+        const subcontasAutorizadas = subcontasSnapshot.size;
+        
+        // Dados de receita e execuções virão de outras coleções no futuro
+        // Por enquanto, usaremos valores de exemplo
+        const receita = 4231.89;
+        const execucoesDia = 573;
+
+        setStats({
+          scriptsAtivos,
+          subcontasAutorizadas,
+          receita,
+          execucoesDia,
+        });
+      } catch (error) {
+        console.error("Erro ao buscar dados do Firestore:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -24,8 +71,12 @@ export default function DashboardPage() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">12</div>
-          <p className="text-xs text-muted-foreground">+3 desde o último mês</p>
+          {loading ? (
+            <Skeleton className="h-8 w-1/2" />
+          ) : (
+            <div className="text-2xl font-bold">{stats.scriptsAtivos}</div>
+          )}
+          <p className="text-xs text-muted-foreground">Total de scripts cadastrados</p>
         </CardContent>
       </Card>
       <Card>
@@ -50,9 +101,13 @@ export default function DashboardPage() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+235</div>
+          {loading ? (
+            <Skeleton className="h-8 w-1/2" />
+          ) : (
+            <div className="text-2xl font-bold">{stats.subcontasAutorizadas}</div>
+          )}
           <p className="text-xs text-muted-foreground">
-            +180.1% desde o último mês
+            Total de subcontas com acesso
           </p>
         </CardContent>
       </Card>
@@ -74,8 +129,12 @@ export default function DashboardPage() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">R$4,231.89</div>
-          <p className="text-xs text-muted-foreground">+19% desde o último mês</p>
+          {loading ? (
+             <Skeleton className="h-8 w-1/2" />
+          ) : (
+          <div className="text-2xl font-bold">R${stats.receita.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+          )}
+          <p className="text-xs text-muted-foreground">Receita do último mês (exemplo)</p>
         </CardContent>
       </Card>
       <Card>
@@ -95,8 +154,12 @@ export default function DashboardPage() {
           </svg>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">+573</div>
-          <p className="text-xs text-muted-foreground">+201 desde ontem</p>
+         {loading ? (
+            <Skeleton className="h-8 w-1/2" />
+          ) : (
+          <div className="text-2xl font-bold">+{stats.execucoesDia}</div>
+          )}
+          <p className="text-xs text-muted-foreground">Média de execuções (exemplo)</p>
         </CardContent>
       </Card>
     </div>
