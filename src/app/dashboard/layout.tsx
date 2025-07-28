@@ -70,8 +70,8 @@ export default function DashboardLayout({
               </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-               <Link href="#">
-                <SidebarMenuButton tooltip="Subcontas">
+               <Link href="/dashboard/subcontas">
+                <SidebarMenuButton tooltip="Subcontas" isActive={pathname === '/dashboard/subcontas'}>
                   <Users />
                   Subcontas
                 </SidebarMenuButton>
