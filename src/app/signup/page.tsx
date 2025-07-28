@@ -11,27 +11,40 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
-export default function LoginPage() {
+export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({
+        variant: 'destructive',
+        title: 'Erro',
+        description: 'As senhas não coincidem.',
+      });
+      return;
+    }
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await createUserWithEmailAndPassword(auth, email, password);
+      toast({
+        title: 'Sucesso!',
+        description: 'Sua conta foi criada. Redirecionando para o painel.',
+      });
       router.push('/dashboard');
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Erro de Login',
+        title: 'Erro ao criar conta',
         description: error.message,
       });
     }
@@ -40,11 +53,11 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-sm">
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleSignup}>
           <CardHeader>
-            <CardTitle className="text-2xl">Login</CardTitle>
+            <CardTitle className="text-2xl">Criar Conta</CardTitle>
             <CardDescription>
-              Entre com seu email e senha para acessar o painel.
+              Crie uma conta para começar a gerenciar seus scripts.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
@@ -69,18 +82,28 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
               />
             </div>
+            <div className="grid gap-2">
+              <Label htmlFor="confirm-password">Confirmar Senha</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
             <Button type="submit" className="w-full">
-              Entrar
+              Criar conta
             </Button>
           </CardContent>
           <CardFooter className="flex justify-center">
             <p className="text-sm text-muted-foreground">
-              Não tem uma conta?{' '}
+              Já tem uma conta?{' '}
               <Link
-                href="/signup"
+                href="/"
                 className="font-medium text-primary hover:underline"
               >
-                Criar conta
+                Fazer login
               </Link>
             </p>
           </CardFooter>
