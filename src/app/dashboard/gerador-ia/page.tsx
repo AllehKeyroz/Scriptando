@@ -86,6 +86,7 @@ export default function GeradorIAPage() {
     
     const userMessage: Message = { id: `user-${Date.now()}`, sender: 'user', text: input };
     setMessages((prev) => [...prev, userMessage]);
+    const currentInput = input;
     setInput('');
     setIsLoading(true);
 
@@ -94,10 +95,10 @@ export default function GeradorIAPage() {
         throw new Error("O conteúdo do DOM da página GHL não foi carregado. Certifique-se de que o script está sendo executado corretamente na página principal.");
       }
       
-      const aiInput: GenerateScriptInput = { dom: domContent, command: input };
+      const aiInput: GenerateScriptInput = { dom: domContent, command: currentInput };
       const result = await generateScript(aiInput);
 
-      if(!result.script) {
+      if(!result || !result.script) {
         throw new Error("A IA não retornou um script válido.");
       }
 

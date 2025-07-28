@@ -10,13 +10,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-const GenerateScriptInputSchema = z.object({
+export const GenerateScriptInputSchema = z.object({
   dom: z.string().describe('O conteúdo HTML completo do corpo (body) da página Go High Level onde o script será executado.'),
   command: z.string().describe('O comando em linguagem natural descrevendo a funcionalidade que o script deve implementar.'),
 });
 export type GenerateScriptInput = z.infer<typeof GenerateScriptInputSchema>;
 
-const GenerateScriptOutputSchema = z.object({
+export const GenerateScriptOutputSchema = z.object({
   script: z.string().describe('O código JavaScript gerado. O código não deve incluir as tags <script></script>, apenas o JS puro.'),
 });
 export type GenerateScriptOutput = z.infer<typeof GenerateScriptOutputSchema>;
@@ -60,7 +60,8 @@ const generateScriptFlow = ai.defineFlow(
     outputSchema: GenerateScriptOutputSchema,
   },
   async (input) => {
-    const { output } = await prompt(input);
+    const result = await prompt(input);
+    const output = result.output;
     if (!output) {
       throw new Error('A IA não conseguiu gerar um script. Tente refinar seu comando.');
     }
