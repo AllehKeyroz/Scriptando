@@ -1,5 +1,4 @@
 
-
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
 
 const SCRIPT_CONTENT = (appBaseUrl) => {
@@ -19,31 +18,44 @@ const SCRIPT_CONTENT = (appBaseUrl) => {
     let widgetButton = null;
 
     function getSubaccountId() {
+        console.log('GHL Script Manager: Tentando obter o ID da subconta...');
         try {
+            // 1. Tenta extrair da URL (método mais confiável)
+            const urlPath = window.location.pathname;
+            const urlMatch = urlPath.match(/\\/location\\/([a-zA-Z0-9]+)/);
+            if (urlMatch && urlMatch[1]) {
+                console.log('GHL Script Manager: ID da subconta encontrado na URL:', urlMatch[1]);
+                return urlMatch[1];
+            }
+            console.log('GHL Script Manager: Não foi possível encontrar o ID na URL. Tentando métodos de fallback...');
+
+            // 2. Tenta a variável global `window.locationId`
             if (window.locationId) {
-                console.log('GHL Script Manager: Encontrado locationId em window.locationId');
+                console.log('GHL Script Manager: Encontrado locationId em window.locationId:', window.locationId);
                 return window.locationId;
             }
             
+            // 3. Tenta a classe do body
             const bodyClass = document.body.className;
-            const match = bodyClass.match(/location-([a-zA-Z0-9]+)/);
-            if (match && match[1]) {
-                 console.log('GHL Script Manager: Encontrado locationId na classe do body.');
-                return match[1];
+            const classMatch = bodyClass.match(/location-([a-zA-Z0-9]+)/);
+            if (classMatch && classMatch[1]) {
+                 console.log('GHL Script Manager: Encontrado locationId na classe do body:', classMatch[1]);
+                return classMatch[1];
             }
             
+            // 4. Procura em scripts inline
             const scripts = Array.from(document.scripts);
             for (const script of scripts) {
                 if (script.textContent) {
                     const scriptMatch = script.textContent.match(/"locationId":\\s*"([a-zA-Z0-9]+)"/);
                     if (scriptMatch && scriptMatch[1]) {
-                        console.log('GHL Script Manager: Encontrado locationId em um script inline.');
+                        console.log('GHL Script Manager: Encontrado locationId em um script inline:', scriptMatch[1]);
                         return scriptMatch[1];
                     }
                 }
             }
             
-            console.log('GHL Script Manager: Não foi possível encontrar o locationId.');
+            console.log('GHL Script Manager: Falha em todos os métodos. Não foi possível encontrar o locationId.');
             return null;
         } catch (e) {
             console.error('GHL Script Manager: Erro ao obter ID da subconta.', e);
@@ -176,17 +188,14 @@ const SCRIPT_CONTENT = (appBaseUrl) => {
         }
     }
 
-    if (document.body) {
-        init();
-    } else {
-        const observer = new MutationObserver((mutationsList, observer) => {
-            if (document.body) {
-                init();
-                observer.disconnect();
-            }
-        });
-        observer.observe(document.documentElement, { childList: true, subtree: true });
-    }
+    // Aguarda o corpo do documento estar pronto para iniciar o script
+    const observer = new MutationObserver((mutationsList, observer) => {
+        if (document.body) {
+            init();
+            observer.disconnect();
+        }
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
 
 })();
 `;
