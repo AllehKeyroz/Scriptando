@@ -1,15 +1,13 @@
 
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
-// A variável de ambiente é lida no servidor, não precisa ser NEXT_PUBLIC_
-const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:9002';
 
-const SCRIPT_CONTENT = `
+const SCRIPT_CONTENT = (appBaseUrl) => `
 (function() {
     'use strict';
 
     // --- CONFIGURAÇÃO ---
     const ADMIN_ACCOUNT_ID = '${ADMIN_SUBACCOUNT_ID}';
-    const APP_BASE_URL = '${APP_URL}';
+    const APP_BASE_URL = '${appBaseUrl}';
     // ------------------
 
     let currentSubaccountId = null;
@@ -24,14 +22,12 @@ const SCRIPT_CONTENT = `
                 return window.locationId;
             }
             
-            // Tenta encontrar o ID na classe do body, que é o padrão do GHL
             const bodyClass = document.body.className;
             const match = bodyClass.match(/location-([a-zA-Z0-9]+)/);
             if (match && match[1]) {
                 return match[1];
             }
             
-            // Fallback: Tenta encontrar em algum script no DOM que contenha o locationId
             const scripts = Array.from(document.scripts);
             for (const script of scripts) {
                 if (script.textContent) {
@@ -55,7 +51,7 @@ const SCRIPT_CONTENT = `
         
         if (!currentSubaccountId) {
             console.log('GHL Script Manager: ID da subconta não encontrado. Tentando novamente em 2 segundos...');
-            setTimeout(init, 2000); // Tenta novamente pois GHL pode carregar dados depois
+            setTimeout(init, 2000);
             return;
         }
 
@@ -189,8 +185,12 @@ const SCRIPT_CONTENT = `
 })();
 `;
 
-export async function GET() {
-  return new Response(SCRIPT_CONTENT, {
+export async function GET(request: Request) {
+  const url = new URL(request.url);
+  const appBaseUrl = `${url.protocol}//${url.host}`;
+  const scriptBody = SCRIPT_CONTENT(appBaseUrl);
+
+  return new Response(scriptBody, {
     headers: {
       'Content-Type': 'application/javascript; charset=utf-8',
       'Cache-Control': 'no-cache, no-store, must-revalidate',
