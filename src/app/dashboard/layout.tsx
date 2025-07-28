@@ -1,4 +1,5 @@
 'use client';
+import { usePathname } from 'next/navigation';
 import {
   SidebarProvider,
   Sidebar,
@@ -18,6 +19,26 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+
+  const getTitle = () => {
+    switch (pathname) {
+      case '/dashboard':
+        return 'Painel';
+      case '/dashboard/scripts':
+        return 'Scripts';
+      case '/dashboard/subcontas':
+        return 'Subcontas';
+      case '/dashboard/gerador-ia':
+        return 'Gerador IA';
+      case '/dashboard/configuracoes':
+        return 'Configurações';
+      default:
+        return 'Painel';
+    }
+  };
+
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -32,13 +53,13 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard" tooltip="Painel" isActive>
+              <SidebarMenuButton href="/dashboard" tooltip="Painel" isActive={pathname === '/dashboard'}>
                 <Home />
                 Painel
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Scripts">
+              <SidebarMenuButton href="/dashboard/scripts" tooltip="Scripts" isActive={pathname === '/dashboard/scripts'}>
                 <Code />
                 Scripts
               </SidebarMenuButton>
@@ -71,7 +92,7 @@ export default function DashboardLayout({
       <SidebarInset>
         <header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-6">
           <SidebarTrigger />
-          <h1 className="flex-1 text-lg font-semibold">Painel</h1>
+          <h1 className="flex-1 text-lg font-semibold">{getTitle()}</h1>
         </header>
         <main className="flex-1 p-6">{children}</main>
       </SidebarInset>
