@@ -2,7 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { generateScript, GenerateScriptInput } from '@/ai/flows/generate-script-flow';
+import { generateScript, GenerateScriptInput, GenerateScriptOutput } from '@/ai/flows/generate-script-flow';
 import { addDoc, collection, getFirestore } from 'firebase/firestore';
 import { app } from '@/lib/firebase';
 import { Bot, Code, Save, Sparkles, Loader2, Play, User, X } from 'lucide-react';
@@ -18,6 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
 
 interface Message {
   id: string;

@@ -10,13 +10,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const GenerateScriptInputSchema = z.object({
+const GenerateScriptInputSchema = z.object({
   dom: z.string().describe('O conteúdo HTML completo do corpo (body) da página Go High Level onde o script será executado.'),
   command: z.string().describe('O comando em linguagem natural descrevendo a funcionalidade que o script deve implementar.'),
 });
 export type GenerateScriptInput = z.infer<typeof GenerateScriptInputSchema>;
 
-export const GenerateScriptOutputSchema = z.object({
+const GenerateScriptOutputSchema = z.object({
   script: z.string().describe('O código JavaScript gerado. O código não deve incluir as tags <script></script>, apenas o JS puro.'),
 });
 export type GenerateScriptOutput = z.infer<typeof GenerateScriptOutputSchema>;
