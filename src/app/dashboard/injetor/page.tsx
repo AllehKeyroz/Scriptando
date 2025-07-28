@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
@@ -9,12 +9,18 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 export default function InjetorPage() {
     const { toast } = useToast();
     const [copied, setCopied] = useState(false);
+    const [scriptLoader, setScriptLoader] = useState('<script src="..." async defer></script>');
     
-    // O script loader agora será relativo, o que o torna universal.
-    const SCRIPT_LOADER = `<script src="/api/injector" async defer></script>`;
+    // Determina a URL base da aplicação no lado do cliente para garantir que o snippet esteja correto.
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const appBaseUrl = window.location.origin;
+            setScriptLoader(`<script src="${appBaseUrl}/api/injector" async defer></script>`);
+        }
+    }, []);
 
     const handleCopy = () => {
-        navigator.clipboard.writeText(SCRIPT_LOADER);
+        navigator.clipboard.writeText(scriptLoader);
         setCopied(true);
         toast({
             title: 'Copiado!',
@@ -53,7 +59,7 @@ export default function InjetorPage() {
                         </p>
                     </div>
                     <pre className="bg-muted p-4 rounded-md text-sm font-mono overflow-x-auto">
-                        <code>{SCRIPT_LOADER}</code>
+                        <code>{scriptLoader}</code>
                     </pre>
                 </CardContent>
                 <CardFooter>

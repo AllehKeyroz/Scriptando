@@ -1,4 +1,5 @@
 
+
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
 
 const SCRIPT_CONTENT = (appBaseUrl) => `
@@ -187,7 +188,12 @@ const SCRIPT_CONTENT = (appBaseUrl) => `
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const appBaseUrl = `${url.protocol}//${url.host}`;
+  // Determina a base da URL dinamicamente a partir do cabeçalho da requisição ou da URL da própria requisição.
+  // Isso garante que funcione tanto em desenvolvimento (localhost) quanto em produção.
+  const host = request.headers.get('host') || url.host;
+  const protocol = host.startsWith('localhost') ? 'http:' : 'https:';
+  const appBaseUrl = `${protocol}//${host}`;
+
   const scriptBody = SCRIPT_CONTENT(appBaseUrl);
 
   return new Response(scriptBody, {
