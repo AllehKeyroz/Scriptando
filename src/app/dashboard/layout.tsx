@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   SidebarProvider,
@@ -53,38 +54,48 @@ export default function DashboardLayout({
         <SidebarContent>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard" tooltip="Painel" isActive={pathname === '/dashboard'}>
-                <Home />
-                Painel
-              </SidebarMenuButton>
+                <Link href="/dashboard">
+                  <SidebarMenuButton tooltip="Painel" isActive={pathname === '/dashboard'}>
+                    <Home />
+                    Painel
+                  </SidebarMenuButton>
+                </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="/dashboard/scripts" tooltip="Scripts" isActive={pathname === '/dashboard/scripts'}>
-                <Code />
-                Scripts
-              </SidebarMenuButton>
+              <Link href="/dashboard/scripts">
+                <SidebarMenuButton tooltip="Scripts" isActive={pathname === '/dashboard/scripts'}>
+                  <Code />
+                  Scripts
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Subcontas">
-                <Users />
-                Subcontas
-              </SidebarMenuButton>
+               <Link href="#">
+                <SidebarMenuButton tooltip="Subcontas">
+                  <Users />
+                  Subcontas
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Gerador IA">
-                <Bot />
-                Gerador IA
-              </SidebarMenuButton>
+               <Link href="#">
+                <SidebarMenuButton tooltip="Gerador IA">
+                  <Bot />
+                  Gerador IA
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton href="#" tooltip="Configurações">
-                <Settings />
-                Configurações
-              </SidebarMenuButton>
+               <Link href="#">
+                <SidebarMenuButton tooltip="Configurações">
+                  <Settings />
+                  Configurações
+                </SidebarMenuButton>
+              </Link>
             </SidebarMenuItem>
           </SidebarMenu>
         </SidebarFooter>
