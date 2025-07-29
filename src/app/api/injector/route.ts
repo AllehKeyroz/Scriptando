@@ -3,7 +3,32 @@ import { type NextRequest } from 'next/server';
 // Este é o ID da sua conta de agência/desenvolvimento. É usado para ativar o widget de IA.
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
 
-const SCRIPT_CONTENT = (appBaseUrl: string) => {
+function SCRIPT_CONTENT(appBaseUrl: string) {
+  // A função `getSubaccountId` é definida aqui dentro para garantir que ela exista no escopo do navegador
+  const getSubaccountId = () => {
+    console.log('GHL Script Manager: Tentando obter o ID da subconta...');
+    try {
+        const urlPath = window.location.pathname;
+        const urlMatch = urlPath.match(/location\/([a-zA-Z0-9]+)/);
+        if (urlMatch && urlMatch[1]) {
+            console.log('GHL Script Manager: ID da subconta encontrado na URL:', urlMatch[1]);
+            return urlMatch[1];
+        }
+        
+        // Fallback para window.locationId se existir
+        if (window.locationId) {
+            console.log('GHL Script Manager: ID encontrado em window.locationId:', window.locationId);
+            return window.locationId;
+        }
+
+        console.log('GHL Script Manager: Não foi possível encontrar o locationId na URL ou em window.locationId.');
+        return null;
+    } catch (e) {
+        console.error('GHL Script Manager: Erro ao obter ID da subconta.', e);
+        return null;
+    }
+  };
+
   return `
 (function() {
     'use strict';
@@ -19,31 +44,8 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
     let aiWidgetIframe = null;
     let widgetButton = null;
 
-    function getSubaccountId() {
-        console.log('GHL Script Manager: Tentando obter o ID da subconta...');
-        try {
-            const urlPath = window.location.pathname;
-            const urlMatch = urlPath.match(/\\/location\\/([a-zA-Z0-9]+)/);
-            if (urlMatch && urlMatch[1]) {
-                console.log('GHL Script Manager: ID da subconta encontrado na URL:', urlMatch[1]);
-                return urlMatch[1];
-            }
-            
-            console.log('GHL Script Manager: Não foi possível encontrar o ID na URL. Verificando métodos alternativos...');
-            
-            // Fallback: Tenta a variável global \`window.locationId\`
-            if (window.locationId) {
-                console.log('GHL Script Manager: ID encontrado em window.locationId:', window.locationId);
-                return window.locationId;
-            }
-            
-            console.log('GHL Script Manager: Falha em todos os métodos. Não foi possível encontrar o locationId.');
-            return null;
-        } catch (e) {
-            console.error('GHL Script Manager: Erro ao obter ID da subconta.', e);
-            return null;
-        }
-    }
+    // A função é injetada aqui como uma string e depois convertida para função real.
+    const getSubaccountId = ${getSubaccountId.toString()};
     
     function showActiveBanner() {
         if (document.getElementById('ghl-script-active-banner')) return;
@@ -87,7 +89,6 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
       try {
         const response = await fetch(\`\${APP_BASE_URL}/api/scripts?subaccountId=\${subaccountId}\`);
         if (!response.ok) {
-           // Se a resposta não for OK (ex: 403, 500), o backend já tratou e logou o erro.
            console.log(\`GHL Script Manager: Falha ao buscar scripts. Status: \${response.status}\`);
            return;
         }
@@ -98,14 +99,18 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
             return;
         }
 
-        console.log(\`GHL Script Manager: \${scriptsToRun.length} script(s) recebido(s) para execução.\`);
+        console.log(\`GHL Script Manager: \${scriptsToRun.length} script(s) recebido(s). Injetando no documento...\`);
 
         scriptsToRun.forEach(script => {
           try {
-            console.log(\`GHL Script Manager: Executando script '\${script.nome}' (Versão: \${script.versao})\`);
-            new Function(script.conteudo)();
+            console.log(\`GHL Script Manager: Injetando script '\${script.nome}' (Versão: \${script.versao})\`);
+            const scriptElement = document.createElement('script');
+            scriptElement.type = 'text/javascript';
+            scriptElement.textContent = script.conteudo;
+            document.body.appendChild(scriptElement);
+            console.log(\`GHL Script Manager: Script '\${script.nome}' injetado com sucesso.\`);
           } catch (e) {
-            console.error(\`GHL Script Manager: Erro ao executar o script '\${script.nome}':\`, e);
+            console.error(\`GHL Script Manager: Erro ao injetar o script '\${script.nome}':\`, e);
           }
         });
 
@@ -233,7 +238,10 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
         } else if (type === 'EXECUTE_SCRIPT') {
             try {
                 console.log('GHL Script Manager: Executando script de teste...');
-                new Function(script)();
+                const scriptElement = document.createElement('script');
+                scriptElement.type = 'text/javascript';
+                scriptElement.textContent = script;
+                document.body.appendChild(scriptElement);
                 console.log('GHL Script Manager: Script de teste executado com sucesso.');
             } catch(e) {
                 console.error('GHL Script Manager: Erro ao executar script de teste:', e);
