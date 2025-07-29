@@ -13,7 +13,7 @@ configureGenkit({
     dotprompt(),
   ],
   logLevel: 'debug',
-  enableTracingAndMetrics: true,
+  enableTracingAndMetrics: false,
 });
 
 export const ai = genkit({

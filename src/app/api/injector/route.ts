@@ -63,6 +63,71 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
             return null;
         }
     }
+    
+    function showActiveBanner() {
+        if (document.getElementById('ghl-script-active-banner')) return;
+
+        const banner = document.createElement('div');
+        banner.id = 'ghl-script-active-banner';
+        banner.style.position = 'fixed';
+        banner.style.top = '10px';
+        banner.style.left = '50%';
+        banner.style.transform = 'translateX(-50%)';
+        banner.style.padding = '10px 20px';
+        banner.style.backgroundColor = '#28a745';
+        banner.style.color = 'white';
+        banner.style.borderRadius = '8px';
+        banner.style.zIndex = '10000';
+        banner.style.fontSize = '14px';
+        banner.style.fontFamily = 'Arial, sans-serif';
+        banner.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+        banner.style.display = 'flex';
+        banner.style.alignItems = 'center';
+        banner.style.gap = '15px';
+        banner.innerHTML = '<span>GHL Script Manager: Ativo</span>';
+
+        const closeButton = document.createElement('button');
+        closeButton.innerHTML = '&times;';
+        closeButton.style.background = 'none';
+        closeButton.style.border = 'none';
+        closeButton.style.color = 'white';
+        closeButton.style.fontSize = '20px';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.lineHeight = '1';
+        closeButton.onclick = () => banner.remove();
+
+        banner.appendChild(closeButton);
+        document.body.appendChild(banner);
+    }
+
+    async function fetchAndRunScripts(subaccountId) {
+      console.log('GHL Script Manager: Verificando autorização da subconta:', subaccountId);
+      
+      // Futuramente, a API verificaria se a subconta é autorizada antes de retornar os scripts.
+      // Por enquanto, vamos assumir que todas são (exceto a de admin).
+      try {
+        // Esta rota da API precisa ser criada.
+        const response = await fetch(\`\${APP_BASE_URL}/api/scripts?subaccountId=\${subaccountId}\`);
+        if (!response.ok) {
+           throw new Error(\`Falha ao buscar scripts: \${response.statusText}\`);
+        }
+        const scriptsToRun = await response.json();
+        
+        console.log(\`GHL Script Manager: \${scriptsToRun.length} script(s) recebido(s) para execução.\`);
+
+        scriptsToRun.forEach(script => {
+          try {
+            console.log(\`GHL Script Manager: Executando script '\${script.nome}' (Versão: \${script.versao})\`);
+            new Function(script.conteudo)();
+          } catch (e) {
+            console.error(\`GHL Script Manager: Erro ao executar o script '\${script.nome}':\`, e);
+          }
+        });
+
+      } catch (error) {
+        console.error('GHL Script Manager: Erro no processo de busca e execução de scripts:', error);
+      }
+    }
 
     function init() {
         console.log('GHL Script Manager: Inicializando...');
@@ -75,6 +140,7 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
         }
 
         console.log('GHL Script Manager: ID da Subconta Detectado:', currentSubaccountId);
+        showActiveBanner();
         
         isAdminMode = (currentSubaccountId === ADMIN_ACCOUNT_ID);
 
@@ -82,8 +148,8 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
             console.log('GHL Script Manager: Modo Administrador ATIVADO.');
             injectAdminWidget();
         } else {
-            console.log('GHL Script Manager: Modo Padrão. Carregando scripts para subcontas autorizadas...');
-            // Futuramente, aqui será carregado o script para subcontas normais
+            console.log('GHL Script Manager: Modo Cliente. Carregando scripts para subconta autorizada...');
+            fetchAndRunScripts(currentSubaccountId);
         }
     }
 
