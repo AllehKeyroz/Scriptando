@@ -1,5 +1,6 @@
 import { type NextRequest } from 'next/server';
 
+// Este é o ID da sua conta de agência/desenvolvimento. É usado para ativar o widget de IA.
 const ADMIN_SUBACCOUNT_ID = 'q0DpTdHQceFBme8mKQdO';
 
 const SCRIPT_CONTENT = (appBaseUrl: string) => {
@@ -21,39 +22,19 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
     function getSubaccountId() {
         console.log('GHL Script Manager: Tentando obter o ID da subconta...');
         try {
-            // 1. Tenta extrair da URL (método mais confiável)
             const urlPath = window.location.pathname;
             const urlMatch = urlPath.match(/\\/location\\/([a-zA-Z0-9]+)/);
             if (urlMatch && urlMatch[1]) {
                 console.log('GHL Script Manager: ID da subconta encontrado na URL:', urlMatch[1]);
                 return urlMatch[1];
             }
-            console.log('GHL Script Manager: Não foi possível encontrar o ID na URL. Tentando métodos de fallback...');
-
-            // 2. Tenta a variável global \`window.locationId\`
+            
+            console.log('GHL Script Manager: Não foi possível encontrar o ID na URL. Verificando métodos alternativos...');
+            
+            // Fallback: Tenta a variável global \`window.locationId\`
             if (window.locationId) {
-                console.log('GHL Script Manager: Encontrado locationId em window.locationId:', window.locationId);
+                console.log('GHL Script Manager: ID encontrado em window.locationId:', window.locationId);
                 return window.locationId;
-            }
-            
-            // 3. Tenta a classe do body
-            const bodyClass = document.body.className;
-            const classMatch = bodyClass.match(/location-([a-zA-Z0-9]+)/);
-            if (classMatch && classMatch[1]) {
-                 console.log('GHL Script Manager: Encontrado locationId na classe do body:', classMatch[1]);
-                return classMatch[1];
-            }
-            
-            // 4. Procura em scripts inline
-            const scripts = Array.from(document.scripts);
-            for (const script of scripts) {
-                if (script.textContent) {
-                    const scriptMatch = script.textContent.match(/"locationId":\\s*"([a-zA-Z0-9]+)"/);
-                    if (scriptMatch && scriptMatch[1]) {
-                        console.log('GHL Script Manager: Encontrado locationId em um script inline:', scriptMatch[1]);
-                        return scriptMatch[1];
-                    }
-                }
             }
             
             console.log('GHL Script Manager: Falha em todos os métodos. Não foi possível encontrar o locationId.');
@@ -101,18 +82,22 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
     }
 
     async function fetchAndRunScripts(subaccountId) {
-      console.log('GHL Script Manager: Verificando autorização da subconta:', subaccountId);
+      console.log('GHL Script Manager: Verificando autorização e buscando scripts para a subconta:', subaccountId);
       
-      // Futuramente, a API verificaria se a subconta é autorizada antes de retornar os scripts.
-      // Por enquanto, vamos assumir que todas são (exceto a de admin).
       try {
-        // Esta rota da API precisa ser criada.
         const response = await fetch(\`\${APP_BASE_URL}/api/scripts?subaccountId=\${subaccountId}\`);
         if (!response.ok) {
-           throw new Error(\`Falha ao buscar scripts: \${response.statusText}\`);
+           // Se a resposta não for OK (ex: 403, 500), o backend já tratou e logou o erro.
+           console.log(\`GHL Script Manager: Falha ao buscar scripts. Status: \${response.status}\`);
+           return;
         }
         const scriptsToRun = await response.json();
         
+        if (scriptsToRun.length === 0) {
+            console.log('GHL Script Manager: Subconta não autorizada ou nenhum script disponível.');
+            return;
+        }
+
         console.log(\`GHL Script Manager: \${scriptsToRun.length} script(s) recebido(s) para execução.\`);
 
         scriptsToRun.forEach(script => {
@@ -148,7 +133,7 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
             console.log('GHL Script Manager: Modo Administrador ATIVADO.');
             injectAdminWidget();
         } else {
-            console.log('GHL Script Manager: Modo Cliente. Carregando scripts para subconta autorizada...');
+            console.log('GHL Script Manager: Modo Cliente. Verificando autorização...');
             fetchAndRunScripts(currentSubaccountId);
         }
     }
@@ -232,7 +217,8 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
     }
 
     function handleMessagesFromApp(event) {
-        if (event.origin !== APP_BASE_URL) return;
+        // A verificação de origem é importante para segurança
+        if (event.origin !== new URL(APP_BASE_URL).origin) return;
 
         const { type, script } = event.data;
         
@@ -269,6 +255,7 @@ const SCRIPT_CONTENT = (appBaseUrl: string) => {
 }
 
 export async function GET(request: NextRequest) {
+  // Constrói a URL base dinamicamente a partir dos cabeçalhos da requisição
   const url = request.nextUrl;
   const host = request.headers.get('host') || url.host;
   const protocol = host.startsWith('localhost') ? 'http:' : 'https:';
